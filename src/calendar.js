@@ -22,9 +22,9 @@ function initCalendarPage() {
   icuButton.querySelector("span").innerText = ".icu";
 
   let token = getToken();
-  chrome.runtime.sendMessage({ action: 'setToken', systmToken: token });
-
   let userProfile = getUserProfile();
+
+  chrome.runtime.sendMessage({ action: 'setToken', systmToken: token });
   chrome.runtime.sendMessage({ action: 'setUserProfile', userProfile: userProfile });
 }
 
