@@ -1,0 +1,19 @@
+Synchronise your Wahoo SYSTM workouts from the web based calendar page right into your intervals.icu account.  Just click the extension button in the toolbar or the .icu button in the top right of the calendar.
+
+**New in v0.0.0.6**
+- "Shift" option to move your SYSTM calendar items forward or back by an increment of days
+
+**Coming Soon**
+- User defined target power range for outdoor workouts
+- ICalendar (.ics) download
+- Invididual workout sync by click for indoor or outdoor (so that you don't have to change options just to upload one or two workouts as the other type).
+- Firefox compatibility
+
+- Choose between indoor or outdoor workout types (options page)
+- Brings an ERG based version of the workout right into the item on your intervals.icu calendar
+- Synchronise items or clear items from your intervals.icu calendar by using the "Sync" or "Delete" buttons
+- Moved items will be fully tracked to their new date on your intervals.icu calendar
+- Supports all known SYSTM activity types
+- Imports any unrecognised items as notes so you don't miss them
+
+Obtain your intervals.icu developer API key by logging in to intervals.icu and going to the settings page, scrolling to the bottom, and you will see "Developer Settings" on the right.
