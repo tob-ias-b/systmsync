@@ -39,7 +39,7 @@ function formatWorkoutToErg(workout, riderProfile, settings) {
       for (let o = 0; o < interval.objects.length; o++) {
         let item = interval.objects[o];
         if (item.type === "targets") {
-          let seconds = item.size / 1000;
+          let seconds = Math.floor(item.size / 1000);
           //let power = calcWattTargetFromTarget(riderProfile, item) + 'W';
           let power = calcFtpPercentFromTarget(riderProfile, item) + "%";
           let hrZone = item.parameters.hasOwnProperty("hrZone")
