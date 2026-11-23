@@ -8,7 +8,7 @@
     "48": "media/icon_48.png",
     "128": "media/icon_128.png"
   },
-  "version": "0.0.0.4",
+  "version": "0.0.0.5",
   "description": "Sync Wahoo SYSTM calendar items to your intervals.icu account",
   "options_ui": {
     "page": "options/options.html",
