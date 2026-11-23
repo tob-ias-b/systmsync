@@ -1,13 +1,19 @@
 {
   "manifest_version": 3,
-  "name": "Wahoo SYSTM Calendar Sync",
+  "name": "SYSTM 2 ICU Calendar Sync",
+  "icons": {
+    "16": "calendar_16.png",
+    "32": "calendar_32.png",
+    "48": "calendar_48.png",
+    "128": "calendar_128.png"
+  },
+  "version": "0.0.0.1",
+  "description": "Sync Wahoo SYSTM calendar items to your intervals.icu account",
   "options_ui": 
   {
 	  "page": "options.html",
 	  "open_in_tab": false
   },
-  "version": "1.0",
-  "description": "Sync SYSTM calendar items to your intervals.icu account",
   "background": {
     "service_worker": "background.js"
   },
