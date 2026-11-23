@@ -2,15 +2,18 @@
 <html>
 
 <head>
-  <title>SYSTM Calendar Sync Extension Options</title>
+  <title>SYSTM 2 INTERVALSCalendar Sync Extension Options</title>
+  <link href="options.css" rel="stylesheet" />
 </head>
 
 <body>
   <div>
-    <p>Find this useful?  You can show your gratitude, and encourage further development if you <a href="https://buymeacoffee.com/iliketurtles">buy me a coffee</a>.</p>
+    <p>Find this useful? You can show your gratitude, and encourage further development if you <a
+        href="https://buymeacoffee.com/iliketurtles" target="_blank">buy me a coffee</a>.</p>
     <ul>
-      <li>"Delete Sync" removes items in your SYSTM calendar from your intervals.icu calendar, rather than adding/updating them.</li>
-      <li>"Prefer Outdoor" when set to "Yes" will get the outdoor version of the workout, if one is avilable.</li>
+      <li>"Delete Sync" removes items in your SYSTM calendar from your intervals.icu calendar, rather than
+        adding/updating them.</li>
+      <li>"Prefer Outdoor" when set to "Yes" will get the outdoor version of the workout, if one is available.</li>
     </ul>
     <p>Athlete ID and API Key are obtained from your intervals.icu page and are required fields.</p>
     <p>To get your settings from intervals.icu:</p>
@@ -21,29 +24,79 @@
       <li>"Developer Settings" on the right has your Athlete ID and your API key</li>
     </ul>
   </div>
-  <div>
-    <label for="deleteMode">Delete sync?</label>
-    <select id="deleteMode">
-      <option value="true">Yes</option>
-      <option value="false">No</option>
-    </select>
-    <span id="deletemode_error"></span><br />
-    <label for="preferOutdoor">Prefer Outdoor</label>
-    <select id="preferOutdoor">
-      <option value="true">Yes</option>
-      <option value="false">No</option>
-    </select>
-    <span id="preferoutdoor_error"></span><br />
-    <label for="intervals_athleteid">Athlete ID</label>
-    <input type="text" id="intervals_athleteid" />
-    <span id="athleteid_error"></span><br />
-    <label for="intervals_apikey">API Key</label>
-    <input type="text" id="intervals_apikey" />
-    <span id="apikey_error"></span><br />
-    <div id="status"></div>
-    <button id="save">Save</button>
+  <div class="row">
+    <div class="column-2">
+      <label for="deleteMode">Delete sync?</label>
+    </div>
+    <div class="column-2">
+      <select id="deleteMode">
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+      </select>
+    </div>
   </div>
+  <div class="row">
+    <div class="column-1 error-column">
+      <span id="deletemode_error"></span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="column-2">
+      <label for="preferOutdoor">Prefer Outdoor</label>
+    </div>
+    <div class="column-2">
+      <select id="preferOutdoor">
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+      </select>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column-1 error-column">
+      <span id="preferoutdoor_error"></span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="column-2">
+      <label for="intervals_athleteid">Athlete ID</label>
+    </div>
+    <div class="column-2">
+      <input type="text" id="intervals_athleteid" />
+    </div>
+  </div>
+  <div class="row">
+    <div class="column-1 error-column">
+      <span id="athleteid_error"></span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="column-2">
+      <label for="intervals_apikey">API Key</label>
+    </div>
+    <div class="column-2">
+      <input type="text" id="intervals_apikey" />
+    </div>
+  </div>
+  <div class="row">
+    <div class="column-1 error-column">
+      <span id="apikey_error"></span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="column-2">
+      <button id="save">Save</button>
+    </div>
+    <div class="column-2">
+      <span id="status"></span>
+    </div>
+  </div>
+
   <script src="options.js"></script>
+
 </body>
 
 </html>

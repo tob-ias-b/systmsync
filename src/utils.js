@@ -17,11 +17,11 @@ function getAgendaStartEndDate() {
     return p;
 }
 
-function formatWorkoutToErg(workoutGraph, useOutdoor) {
+function formatWorkoutTriggerToErg(workoutGraph, useOutdoor) {
 
     const workoutLines = [];
 
-    if(workoutGraph == null){
+    if(workoutGraph == null || workoutGraph.workoutGraphTriggers == null || workoutGraph.workoutGraphTriggers.indoor == null){
         return workoutLines;
     }
 
@@ -35,5 +35,43 @@ function formatWorkoutToErg(workoutGraph, useOutdoor) {
         let ftp_percent = Math.floor((triggers.value[i - 1] * 100));
         workoutLines.push("- " + seconds + "s " + ftp_percent + "%");
     }
+    return workoutLines;
+}
+
+function formatWorkoutToErg(workout, useOutdoor) {
+
+    const workoutLines = [];
+
+    if(workout == null){
+        return workoutLines;
+    }
+
+    if(workout.workouts.length === 0){
+        return workoutLines;
+    }
+
+    if(workout.workouts[0].triggers == null){
+        return workoutLines;
+    }
+
+    workoutTriggers = JSON.parse(workout.workouts[0].triggers);
+
+    for (let s = 0; s < workoutTriggers.length; s++) {
+        let set = workoutTriggers[s];
+        for (let i = 0; i < set.tracks.length; i++) {
+            let interval = set.tracks[i];
+            for (let o = 0; o < interval.objects.length; o++) {
+                let item = interval.objects[o]
+                if(item.type === 'targets'){
+                    let seconds = (item.size / 1000);
+                    let ftp_percent = item.parameters.hasOwnProperty('ftp') ? ' ' + Math.floor((item.parameters.ftp.value * 100)) + '%' : '';
+                    let hrZone = item.parameters.hasOwnProperty('hrZone') ? ' Z' + item.parameters.hrZone.value + ' HR' : '';
+                    let rpm = item.parameters.hasOwnProperty('rpm') ? ' ' + item.parameters.rpm.value + 'rpm' : '';
+                    workoutLines.push('- ' + seconds + 's ' + ftp_percent + hrZone + rpm);
+                }
+            }
+        }
+    }
+
     return workoutLines;
 }

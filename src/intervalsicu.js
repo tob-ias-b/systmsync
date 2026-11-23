@@ -69,8 +69,12 @@ function callIcuApi(icuApiUri, athleteId, bearerToken, payload) {
         const formattedUri =  icuApiUri.uri.replace('{athleteId}', athleteId);
 
         req.addEventListener('load', (e) => {
-            var responsePayload = JSON.parse(e.currentTarget.response);
-            resolve(responsePayload);
+            if(e.currentTarget.status >= 200 && e.currentTarget.status <= 299 ) {
+                let responsePayload = JSON.parse(e.currentTarget.response);
+                resolve(responsePayload);
+            } else {
+                reject('Invalid intervals.icu api response status:' + e.currentTarget.status);
+            }
         });
 
         req.addEventListener('error', (e) => {

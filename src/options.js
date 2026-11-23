@@ -43,7 +43,7 @@ const saveOptions = () => {
         status.textContent = 'Options saved.';
         setTimeout(() => {
           status.textContent = '';
-        }, 750);
+        }, 1000);
       }
     );
  

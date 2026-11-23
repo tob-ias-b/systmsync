@@ -4,7 +4,7 @@ function GetWorkoutGraphTrigger(settings, item) {
     let promise = null;
 
     // Have had at least one instance of an "activity" which came back with no details.
-    // Couldn't recreate but was one that was manully set as complete.
+    // Couldn't recreate but was one that was manually set as complete.
     // Validate ALL required properties before trying to use them.
     let validProperties = true;
     if(item === null) validProperties = false;
@@ -32,6 +32,55 @@ function GetWorkoutGraphTrigger(settings, item) {
     }
 
     return promise.then((data) => {
+        const ergWorkout = formatWorkoutTriggerToErg(data, settings.preferOutdoor);
+        let workout = {
+            name: item.prospects[0].name,
+            type: item.prospects[0].type,
+            description: item.prospects[0].description,
+            plannedDate: item.plannedDate,
+            agendaId: item.agendaId,
+            ergWorkout: ergWorkout
+        };
+        if (wkid != null && wkid.length > 0) {
+            workoutsCache.set(cacheKey, data);
+        }
+        return Promise.resolve(workout);
+    });
+}
+
+function GetWorkouts(settings, item) {
+
+    let promise = null;
+
+    // Have had at least one instance of an "activity" which came back with no details.
+    // Couldn't recreate but was one that was manually set as complete.
+    // Validate ALL required properties before trying to use them.
+    let validProperties = true;
+    if(item === null) validProperties = false;
+    if(item.prospects === null) validProperties = false;
+    if(item.plannedDate === null) validProperties = false;
+    if(item.agendaId === null) validProperties = false;
+    if(validProperties === false) {
+        console.log('Invalid UserPlanQueryItem:');
+        console.log(item);
+        return Promise.resolve(null);
+    }
+
+    const wkid = item.prospects[0].workoutId;
+    const cacheKey = settings.preferOutdoor + ':' + wkid;
+
+    if (wkid != null && wkid.length > 0) {
+        if (workoutsCache.has(cacheKey)) {
+            console.log('Workout Cache Hit:' + cacheKey);
+            promise = Promise.resolve(workoutsCache.get(cacheKey));
+        } else {
+            promise = RunSYSTMQuery(getWorkoutsQuery(wkid));
+        }
+    } else {
+        promise = Promise.resolve(null);
+    }
+
+    return promise.then((data) => {
         const ergWorkout = formatWorkoutToErg(data, settings.preferOutdoor);
         let workout = {
             name: item.prospects[0].name,
@@ -49,14 +98,18 @@ function GetWorkoutGraphTrigger(settings, item) {
 }
 
 
-function GetWorkouts(settings) {
+function GetMappedWorkouts(settings) {
     const promises = [];
     const dates = getAgendaStartEndDate();
 
     return RunSYSTMQuery(userPlanQuery(dates.startDate, dates.endDate))
         .then((data) => {
             data.userPlan.forEach((item) => {
-                promises.push(GetWorkoutGraphTrigger(settings, item));
+                if(settings.preferOutdoor === true) {
+                    promises.push(GetWorkoutGraphTrigger(settings, item));
+                } else {
+                    promises.push(GetWorkouts(settings, item));
+                }
             });
             return Promise.all(promises);
         })
@@ -106,7 +159,7 @@ function handleIcuClick(e) {
             })
             .then(() => {
                 if (settings != null) {
-                    GetWorkouts(settings)
+                    GetMappedWorkouts(settings)
                         .then((workouts) => {
                             if (settings.deleteMode) {
                                 let icuWorkoutDeletes = createIcuWorkoutDeletes(workouts);
@@ -117,7 +170,13 @@ function handleIcuClick(e) {
                             }
                         }).then(() => {
                             showButtonReady(currentTarget);
+                            return Promise.resolve();
                         })
+                        .catch((err) => {
+                            console.log(err);
+                            showButtonError(currentTarget)
+                            return Promise.resolve();
+                        });            
                 }
                 else {
                     showButtonReady(currentTarget);
@@ -127,6 +186,7 @@ function handleIcuClick(e) {
             .catch((err) => {
                 console.log(err);
                 showButtonError(currentTarget)
+                return Promise.resolve();
             });
     }
     catch (error) {

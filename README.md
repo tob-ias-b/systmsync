@@ -26,12 +26,16 @@ Like what you see?  You can donate via buymeacoffee at [buymeacoffee](https://bu
 * It doesn't matter if you sync multiple times, the entries are keyed to the unique id in your SYSTM calendar so won't duplicate.
 * If you move a workout, just sync again, it will get moved in intervals.icu as well.
 
-# Current Limitations
-* There currently isn't any visual feedback about the state of sync.  Maybe next time ....
+# Limitations
+* Currently "off plan" workouts completed in the SYSTM app cannot be uploaded from the calendar (data is missing).
 
 # Future
-* Integrate using OAuth with intervals.icu instead of needing individual API keys
-* Integrate with other platforms
+* Some half decent icons
+* Add a dialog to select custom date ranges.
+* Allow sync of plan items only with a button next to the plan name.
+* Fuigure out a better way to trigger deletes rather than having to change the options.
+* Integrate using OAuth with intervals.icu instead of needing individual API keys.
+* Integrate with other platforms.
 
 # Build and Test
 Currently no unit or regression tests

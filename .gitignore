@@ -12,3 +12,4 @@
 *.vsix
 
 /*.zip
+__azurite*
