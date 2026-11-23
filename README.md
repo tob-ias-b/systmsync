@@ -1,20 +1,40 @@
 # Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+A simple extension to allow uploading of Wahoo SYSTM calendar workouts to intervals.icu
+
+Credit to the developer of the "SYSTM Fit Export" extension which saved me a lot of the initial leg work figuring out the APIs.
+
+https://chromewebstore.google.com/detail/minmiblnbkhcjojgmnlbnpdefimcfmif
+
+Like what you see?  You can donate via buymeacoffee at [buymeacoffee](https://buymeacoffee.com/iliketurtles).
 
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+* Install the extension.
+* Open the options page.
+* Add your Athlete Id and API key from intervals.icu
+  * In intervals.icu, go to settings.
+  * Scroll to bottom.
+  * "Developer Settings" on right hand side.
+* "Delete Sync?" will remove any items in the sync window if set to "Yes".
+* "Prefer Outdoor" when set to "Yes" will upload outdoor versions of a workout, if available.
+
+# How to Sync
+* Go to the calendar page on the Wahoo SYSTM web site [https://systm.wahoofitness.com/calendar](https://systm.wahoofitness.com/calendar?)
+* There should be a new button appear on the page next to the "+Plan" button with ".icu".
+* When clicked, it will take the date currently in the querystring in the location bar and sync all items from that date for 7 days.
+* To sync further, scroll in either direction until the next or previous date is displayed, and click again.
+* If you need to remove items from your intervals.icu calendar, switch the "Delete Sync?" option in the options page to "Yes".  Further syncs will then delete the items instead of uploading/updating them.
+* It doesn't matter if you sync multiple times, the entries are keyed to the unique id in your SYSTM calendar so won't duplicate.
+* If you move a workout, just sync again, it will get moved in intervals.icu as well.
+
+# Current Limitations
+* There currently isn't any visual feedback about the state of sync.  Maybe next time ....
+
+# Future
+* Integrate using OAuth with intervals.icu instead of needing individual API keys
+* Integrate with other platforms
 
 # Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+Currently no unit or regression tests
 
 # Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
-
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+Not open for public contributions at this time.

@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Wahoo SYSTM Calendar Sync",
+  "options_ui": 
+  {
+	  "page": "options.html",
+	  "open_in_tab": false
+  },
+  "version": "1.0",
+  "description": "Sync SYSTM calendar items to your intervals.icu account",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "js": ["utils.js", "intervalsicu.js", "systm.js", "settings.js", "coreScript.js", "query.js"],
+      "matches": [
+        "https://systm.wahoofitness.com/calendar*"
+      ]
+    }
+  ],
+  "permissions": [
+    "storage",
+    "webNavigation"
+  ]
+}

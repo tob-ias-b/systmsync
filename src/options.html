@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>SYSTM Calendar Sync Extension Options</title>
+</head>
+
+<body>
+  <div>
+    <p>You can show your gratitude for my work, and encourage further development if you <a href="https://buymeacoffee.com/iliketurtles">buy me a coffee</a>.</p>
+  </div>
+  <div>
+    <label for="deleteMode">Delete sync?</label>
+    <select id="deleteMode">
+      <option value="true">Yes</option>
+      <option value="false">No</option>
+    </select>
+    <span id="deletemode_error"></span><br />
+    <label for="preferOutdoor">Prefer Outdoor</label>
+    <select id="preferOutdoor">
+      <option value="true">Yes</option>
+      <option value="false">No</option>
+    </select>
+    <span id="preferoutdoor_error"></span><br />
+    <label for="intervals_athleteid">Athlete ID</label>
+    <input type="text" id="intervals_athleteid" />
+    <span id="athleteid_error"></span><br />
+    <label for="intervals_apikey">API Key</label>
+    <input type="text" id="intervals_apikey" />
+    <span id="apikey_error"></span><br />
+    <div id="status"></div>
+    <button id="save">Save</button>
+  </div>
+  <script src="options.js"></script>
+</body>
+
+</html>
