@@ -44,7 +44,7 @@ function getUserProfile() {
 }
 
 function handleIcuClick(e) {
-  chrome.runtime.sendMessage({ action: "openPopup" });
+  chrome.runtime.sendMessage({ action: 'openPopup' });
 }
 
 function createInitTimer() {

@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "SYSTM 2 INTERVALS Calendar Sync",
+  "short_name": "SYSTM2INTRVL",
+  "icons": {
+    "16": "media/icon_16.png",
+    "32": "media/icon_32.png",
+    "48": "media/icon_48.png",
+    "128": "media/icon_128.png"
+  },
+  "version": "0.0.0.7",
+  "description": "Sync Wahoo SYSTM calendar items to your intervals.icu account",
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": false
+  },
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "service_worker": "background/backgroundChrome.js"
+  },
+  "content_scripts": [
+    {
+      "js": ["calendar.js"],
+      "css": ["options/options.css"],
+      "matches": ["https://systm.wahoofitness.com/calendar*"]
+    }
+  ],
+  "permissions": ["storage"],
+  "key:": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkvQc5HvuFh6GayM+Gt4yEISzS6R/IJzkIVc9ljN6cxKF3VYVQqMI/cT70X9+iiDWAdzzbAX5KnhBQlJtI32YhWlxAfrhyH5YqTq3tYRbbkAjZbtdZNPcKx840eOd3MLkZ9svvzP8xNcL61NTiDQSjbLNbp38hJ35sGbXkgjI45JZlrwku3YN8Ugog2MLIypRW5ZewEPNB4OE3In+UeDwsGT2O4Nv9QZpEVJr4JvplGs2yZASyU5IuLZruJv736L9NujrPLBtUsBBnW5rD1OqsCG4Uf/MIfUGDabqNIc5zFdHEMZ2gRQ7mR8rmuzSSMDy6TopA3RtAeIpSchLFnTycwIDAQAB"
+}

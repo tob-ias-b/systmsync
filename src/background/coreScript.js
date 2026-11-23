@@ -49,12 +49,12 @@ function GetWorkout(settings, planItem, token, userProfile, query, formatter) {
   });
 }
 
-function GetWorkoutGraphTriggers(settings, planItem, token) {
+function GetWorkoutGraphTriggers(settings, planItem, userProfile, token) {
   return GetWorkout(
     settings,
     planItem,
     token,
-    null,
+    userProfile,
     workoutGraphTriggersQuery,
     formatWorkoutTriggerToErg
   );
@@ -85,7 +85,7 @@ function GetMappedWorkouts(settings, userProfile, dates, token) {
     .then((data) => {
       data.userPlan.forEach((item) => {
         if (settings.preferOutdoor === true) {
-          promises.push(GetWorkoutGraphTriggers(settings, item, token));
+          promises.push(GetWorkoutGraphTriggers(settings, item, userProfile, token));
         } else {
           promises.push(GetWorkouts(settings, item, userProfile, token));
         }
@@ -115,21 +115,22 @@ function MoveAgendaItems(settings, userProfile, dates, shiftDays, token) {
     token
   ).then((data) => {
     data.userPlan.forEach((item) => {
-      let newDate = new Date(Date.parse(item.plannedDate));
-      newDate.setDate(newDate.getDate() + shiftDays);
-      updateStatus(
-        "Updating item agendaID:" + item.agendaId
-      );   
-      promises.push(
-        RunSYSTMQuery(
-          getMoveAgendaMutation(
-            item.agendaId,
-            newDate.toISOString(),
-            item.appliedTimeZone
-          ),
-          token
-        )
-      );
+      // As long as theres a plannedDate we can move it
+      if (item.plannedDate !== null) {
+        let newDate = new Date(Date.parse(item.plannedDate));
+        newDate.setDate(newDate.getDate() + shiftDays);
+        updateStatus("Updating item agendaID:" + item.agendaId);
+        promises.push(
+          RunSYSTMQuery(
+            getMoveAgendaMutation(
+              item.agendaId,
+              newDate.toISOString(),
+              item.appliedTimeZone
+            ),
+            token
+          )
+        );
+      }
     });
     return Promise.all(promises);
   });

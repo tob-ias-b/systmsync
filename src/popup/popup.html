@@ -38,6 +38,27 @@
     </div>
   </div>
   <script src="popup.js"></script>
+  <dialog id="confirmShiftDialog">
+    <form method="dialog">
+      <p>Are you sure you want to shift all workouts in this range?</p>
+      <button id="shiftConfirm" value="default">OK</button>
+      <button value="cancel" formmethod="dialog">Cancel</button>
+    </form>
+  </dialog>
+  <dialog id="confirmDeleteDialog">
+    <form method="dialog">
+      <p>Are you sure you want to delete SYSTM workouts from Intervals.icu?</p>
+      <button id="deleteConfirm" value="default">OK</button>
+      <button value="cancel" formmethod="dialog">Cancel</button>
+    </form>
+  </dialog>
+  <dialog id="noTokenDialog">
+    <form method="dialog">
+      <p>No SYSTM login token.</p>
+      <p>Go to the calendar page in SYSTM and login.</p>
+      <button>OK</button>
+    </form>
+  </dialog>
 </body>
 
 </html>

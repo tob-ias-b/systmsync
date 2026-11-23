@@ -18,7 +18,7 @@
     "default_popup": "popup/popup.html"
   },
   "background": {
-    "service_worker": "background/background.js"
+    "service_worker": "background/backgroundChrome.js"
   },
   "content_scripts": [
     {

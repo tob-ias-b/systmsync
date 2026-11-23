@@ -1,20 +1,43 @@
 document.addEventListener("DOMContentLoaded", function () {
-  var syncButton = document.getElementById("sync");
+  let syncButton = document.getElementById("sync");
   syncButton.addEventListener("click", function (e) {
     syncClick(e);
   });
-  var deleteButton = document.getElementById("delete");
+
+  var confirmDeleteDialog = document.getElementById("confirmDeleteDialog");
+  let deleteButton = document.getElementById("delete");
   deleteButton.addEventListener("click", function (e) {
-    deleteClick(e);
+    confirmDeleteDialog.showModal();
   });
-  var shiftButton = document.getElementById("shift");
+
+  let confirmDeleteButton = document.getElementById("deleteConfirm");
+  confirmDeleteButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    confirmDeleteDialog.close("OK");
+  });
+
+  confirmDeleteDialog.addEventListener("close", (e) => deleteClick(e));
+
+  var confirmShiftDialog = document.getElementById("confirmShiftDialog");
+  let shiftButton = document.getElementById("shift");
   shiftButton.addEventListener("click", function (e) {
-    shiftClick(e);
+    confirmShiftDialog.showModal();
   });
+
+  let confirmShiftButton = document.getElementById("shiftConfirm");
+  confirmShiftButton.addEventListener("click", function (e) {
+    e.preventDefault();
+    confirmShiftDialog.close("OK");
+  });
+
+  confirmShiftDialog.addEventListener("close", (e) => shiftClick(e));
+
   let dateFrom = document.getElementById("dateFrom");
   dateFrom.value = formatDate(Date.now());
+
   let dateTo = document.getElementById("dateTo");
   dateTo.value = formatDateOffset(Date.now(), 6);
+
   chrome.runtime.onConnect.addListener(function (port) {
     console.assert(port.name === "sync_status_updates");
     if (port.name === "sync_status_updates") {
@@ -29,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
 const messageTypes = {
   sync: "sync",
   syncDelete: "delete",
-  shift: "shift"
+  shift: "shift",
 };
 
 function updateStatus(msg) {
@@ -88,7 +111,7 @@ function createShiftMessage(mode, token) {
     token: token,
     from: from,
     to: to,
-    shiftDays: shiftDays
+    shiftDays: shiftDays,
   };
   return message;
 }
@@ -96,9 +119,7 @@ function createShiftMessage(mode, token) {
 function callSync(messageType) {
   getToken().then((token) => {
     if (token == null) {
-      alert(
-        "No SYSTM login token.  Go to the calendar page in SYSTM and login."
-      );
+      showNoToken();
     } else {
       let message = createSyncMessage(messageType, token);
       chrome.runtime.sendMessage(message);
@@ -109,14 +130,17 @@ function callSync(messageType) {
 function callShift(messageType) {
   getToken().then((token) => {
     if (token == null) {
-      alert(
-        "No SYSTM login token.  Go to the calendar page in SYSTM and login."
-      );
+      showNoToken();
     } else {
       let message = createShiftMessage(messageType, token);
       chrome.runtime.sendMessage(message);
     }
   });
+}
+
+function showNoToken() {
+  let dialog = document.getElementById("noTokenDialog");
+  dialog.showModal();
 }
 
 function syncClick(e) {
@@ -128,21 +152,13 @@ function syncClick(e) {
 }
 
 function deleteClick(e) {
-  if (
-    confirm(
-      "Are you sure you want to delete SYSTM workouts from Intervals.icu?"
-    )
-  ) {
+  if (confirmDeleteDialog.returnValue === "OK") {
     callSync(messageTypes.syncDelete);
   }
 }
 
 function shiftClick(e) {
-  if (
-    confirm(
-      "Are you sure you want to move these workouts?"
-    )
-  ) {
+  if (confirmShiftDialog.returnValue === "OK") {
     callShift(messageTypes.shift);
   }
 }

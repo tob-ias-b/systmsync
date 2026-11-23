@@ -1,10 +1,3 @@
-importScripts("query.js");
-importScripts("settings.js");
-importScripts("utils.js");
-importScripts("intervalsicu.js");
-importScripts("systm.js");
-importScripts("coreScript.js");
-
 chrome.runtime.onMessage.addListener(function (message) {
   switch (message.action) {
     case "setToken":

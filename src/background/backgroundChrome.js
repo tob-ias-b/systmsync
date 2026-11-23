@@ -1,0 +1,1 @@
+importScripts("./settings.js", "./query.js", "./utils.js", "./intervalsicu.js", "./systm.js", "./coreScript.js", "./background.js");

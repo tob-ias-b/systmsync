@@ -1,9 +1,14 @@
+body {
+    font-family: Roboto, Ubuntu, Arial, sans-serif;
+    font-size: normal;
+}
+
 div {
     padding: 5px;
 }
 
 div.container {
-    width: 320px;
+    width: 360px;
 }
 
 div.header{
@@ -15,8 +20,7 @@ div.header span{
     display: flex;
     align-items: center;
     padding-left: 10px;
-    font-family: Roboto, Ubuntu, Arial, sans-serif;
-    font-size: 14px;
+    font-size: large;
     font-weight: 500;
     width: 316px
 }

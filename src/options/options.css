@@ -1,3 +1,8 @@
+body {
+  font-family: Roboto, Ubuntu, Arial, sans-serif;
+  font-size: normal;
+}
+
 input {
   width: 100%;
   padding: 0;
