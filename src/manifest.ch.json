@@ -8,7 +8,7 @@
     "48": "media/icon_48.png",
     "128": "media/icon_128.png"
   },
-  "version": "0.0.0.8",
+  "version": "0.0.0.10",
   "description": "Sync Wahoo SYSTM calendar items to your intervals.icu account",
   "options_ui": {
     "page": "options/options.html",
@@ -27,6 +27,5 @@
       "matches": ["https://systm.wahoofitness.com/calendar*"]
     }
   ],
-  "permissions": ["storage"],
-  "key:": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkvQc5HvuFh6GayM+Gt4yEISzS6R/IJzkIVc9ljN6cxKF3VYVQqMI/cT70X9+iiDWAdzzbAX5KnhBQlJtI32YhWlxAfrhyH5YqTq3tYRbbkAjZbtdZNPcKx840eOd3MLkZ9svvzP8xNcL61NTiDQSjbLNbp38hJ35sGbXkgjI45JZlrwku3YN8Ugog2MLIypRW5ZewEPNB4OE3In+UeDwsGT2O4Nv9QZpEVJr4JvplGs2yZASyU5IuLZruJv736L9NujrPLBtUsBBnW5rD1OqsCG4Uf/MIfUGDabqNIc5zFdHEMZ2gRQ7mR8rmuzSSMDy6TopA3RtAeIpSchLFnTycwIDAQAB"
+  "permissions": ["storage"]
 }

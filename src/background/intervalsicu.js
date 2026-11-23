@@ -75,7 +75,7 @@ const icuApiUris = {
 
 function formatDateForApi(value) {
   let theDate = new Date(value);
-  return theDate.getFullYear() + '-' + (theDate.getMonth() + 1) + '-' + theDate.getDate() + 'T00:00:00';
+  return theDate.getUTCFullYear() + '-' + (theDate.getUTCMonth() + 1).toString().padStart(2, '0') + '-' + theDate.getUTCDate().toString().padStart(2, '0') + 'T00:00:00';
 }
 
 function callIcuApi(icuApiUri, athleteId, token, message, queryString) {
