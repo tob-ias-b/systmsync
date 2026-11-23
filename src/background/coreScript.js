@@ -49,12 +49,12 @@ function GetWorkout(settings, planItem, token, userProfile, query, formatter) {
   });
 }
 
-function GetWorkoutGraphTriggers(settings, planItem, userProfile, token) {
+function GetWorkoutGraphTriggers(settings, planItem, token) {
   return GetWorkout(
     settings,
     planItem,
     token,
-    userProfile,
+    null,
     workoutGraphTriggersQuery,
     formatWorkoutTriggerToErg
   );
@@ -85,7 +85,7 @@ function GetMappedWorkouts(settings, userProfile, dates, token) {
     .then((data) => {
       data.userPlan.forEach((item) => {
         if (settings.preferOutdoor === true) {
-          promises.push(GetWorkoutGraphTriggers(settings, item, userProfile, token));
+          promises.push(GetWorkoutGraphTriggers(settings, item, token));
         } else {
           promises.push(GetWorkouts(settings, item, userProfile, token));
         }
