@@ -86,10 +86,18 @@ function callIcuApi(icuApiUri, athleteId, bearerToken, payload) {
 }
 
 function clearIcu(workouts, settings) {
+    if(workouts === null || workouts.length === 0){
+        // Nothing to do
+        return Promise.resolve({});
+    }
     return callIcuApi(icuApiUris.bulkDelete, settings.athleteId, settings.bearerToken, workouts);
 }
 
 function updateIcu(workouts, settings) {
+    if(workouts === null || workouts.length === 0){
+        // Nothing to do
+        return Promise.resolve({});
+    }
     return callIcuApi(icuApiUris.bulkUpsert, settings.athleteId, settings.bearerToken, workouts);
 }
 

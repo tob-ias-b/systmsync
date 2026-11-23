@@ -1,52 +1,50 @@
-function RunQuery(query) {
-
-    // Credit original version to developer of "SYSTM Fit Export" extension
-    return new Promise(function (resolve, reject) {
-        // At least in Firefox, the bearer token is (now) stored as an array, instead of
-        // dot-separated string, so combine it back into string format
-        const bearerTokenItem = window.localStorage.getItem("SYSTM/user/token");
-        const bearerToken = Array.isArray(bearerTokenItem) ? bearerTokenItem.join(".") : bearerTokenItem;
-
-        const req = new XMLHttpRequest();
-
-        req.addEventListener('load', (e) => {
-            var payload = JSON.parse(e.currentTarget.response);
-            resolve(payload.data);
-        });
-
-        req.addEventListener('error', (e) => {
-            reject(e);
-        });
-
-        req.open("POST", "https://api.thesufferfest.com/graphql");
-        req.setRequestHeader('Content-Type', 'application/json');
-        req.setRequestHeader('Authorization', 'Bearer ' + bearerToken);
-
-        req.send(JSON.stringify(query));
-    });
-}
 
 function GetWorkoutGraphTrigger(settings, item) {
 
     let promise = null;
 
+    // Have had at least one instance of an "activity" which came back with no details.
+    // Couldn't recreate but was one that was manully set as complete.
+    // Validate ALL required properties before trying to use them.
+    let validProperties = true;
+    if(item === null) validProperties = false;
+    if(item.prospects === null) validProperties = false;
+    if(item.plannedDate === null) validProperties = false;
+    if(item.agendaId === null) validProperties = false;
+    if(validProperties === false) {
+        console.log('Invalid UserPlanQueryItem:');
+        console.log(item);
+        return Promise.resolve(null);
+    }
+
     const wkid = item.prospects[0].workoutId;
+    const cacheKey = settings.preferOutdoor + ':' + wkid;
+
     if (wkid != null && wkid.length > 0) {
-        promise = RunQuery(workoutGraphTriggersQuery(wkid));
+        if (workoutsCache.has(cacheKey)) {
+            console.log('Workout Cache Hit:' + cacheKey);
+            promise = Promise.resolve(workoutsCache.get(cacheKey));
+        } else {
+            promise = RunSYSTMQuery(workoutGraphTriggersQuery(wkid));
+        }
     } else {
         promise = Promise.resolve(null);
     }
-    
+
     return promise.then((data) => {
         const ergWorkout = formatWorkoutToErg(data, settings.preferOutdoor);
-        return Promise.resolve({
+        let workout = {
             name: item.prospects[0].name,
             type: item.prospects[0].type,
             description: item.prospects[0].description,
             plannedDate: item.plannedDate,
             agendaId: item.agendaId,
             ergWorkout: ergWorkout
-        });
+        };
+        if (wkid != null && wkid.length > 0) {
+            workoutsCache.set(cacheKey, data);
+        }
+        return Promise.resolve(workout);
     });
 }
 
@@ -54,26 +52,26 @@ function GetWorkoutGraphTrigger(settings, item) {
 function GetWorkouts(settings) {
     const promises = [];
     const dates = getAgendaStartEndDate();
-    
-    return RunQuery(userPlanQuery(dates.startDate, dates.endDate))
-    .then((data) => {
-        data.userPlan.forEach((item) => {
-            promises.push(GetWorkoutGraphTrigger(settings, item));
-        });
-        return Promise.all(promises);
-    })
-    .then((values) => {
-        const workouts = []
-        values.forEach((workout) => {
-            if (workout != null) {
-                workouts.push(workout);
-            }
+
+    return RunSYSTMQuery(userPlanQuery(dates.startDate, dates.endDate))
+        .then((data) => {
+            data.userPlan.forEach((item) => {
+                promises.push(GetWorkoutGraphTrigger(settings, item));
+            });
+            return Promise.all(promises);
         })
-        return Promise.resolve(workouts)
-    });
+        .then((values) => {
+            const workouts = []
+            values.forEach((workout) => {
+                if (workout != null) {
+                    workouts.push(workout);
+                }
+            })
+            return Promise.resolve(workouts)
+        });
 }
 
-function initCalendarPage(containerNode) {
+function initCalendarPage() {
     let icuButton = document.querySelector('[data-test="SyncICU"]');
     if (icuButton != null) {
         return;
@@ -93,32 +91,45 @@ function initCalendarPage(containerNode) {
 }
 
 function handleIcuClick(e) {
-    let settings;
+    let settings = null;
     try {
         let currentTarget = e.currentTarget;
         showButtonBusy(currentTarget);
         getSettings()
-        .then((newSettings) =>{
-            settings = newSettings;
-            return Promise.resolve();
-        })
-        .then(() => {
-            return GetWorkouts(settings);
-        })
-        .then((workouts) =>{
-            if (settings.deleteMode) {
-                let icuWorkoutDeletes = createIcuWorkoutDeletes(workouts);
-                return clearIcu(icuWorkoutDeletes, settings);
-            } else {
-                let icuWorkouts = createIcuWorkouts(workouts);
-                return updateIcu(icuWorkouts, settings);
-            }
-        }).then(() => {
-            showButtonReady(currentTarget);
-        })
-        .catch((err) => showButtonError(currentTarget));
+            .then((newSettings) => {
+                if (newSettings.settingsValid != true) {
+                    chrome.runtime.sendMessage({ "action": "openOptionsPage" });
+                    return Promise.resolve();
+                }
+                settings = newSettings;
+                return Promise.resolve();
+            })
+            .then(() => {
+                if (settings != null) {
+                    GetWorkouts(settings)
+                        .then((workouts) => {
+                            if (settings.deleteMode) {
+                                let icuWorkoutDeletes = createIcuWorkoutDeletes(workouts);
+                                return clearIcu(icuWorkoutDeletes, settings);
+                            } else {
+                                let icuWorkouts = createIcuWorkouts(workouts);
+                                return updateIcu(icuWorkouts, settings);
+                            }
+                        }).then(() => {
+                            showButtonReady(currentTarget);
+                        })
+                }
+                else {
+                    showButtonReady(currentTarget);
+                    return Promise.resolve();
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+                showButtonError(currentTarget)
+            });
     }
-    catch(error){
+    catch (error) {
         showButtonError(currentTarget);
     }
 }
@@ -158,6 +169,8 @@ function findDataTestNode(nodes, elementName, val) {
     return foundValue;
 }
 
+const workoutsCache = new Map();
+
 const observer = new MutationObserver((mutationList, observer) => {
     for (const mutation of mutationList) {
         if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
@@ -170,9 +183,23 @@ const observer = new MutationObserver((mutationList, observer) => {
     }
 });
 
-if (window.location.pathname.startsWith('/calendar')) {
-    observer.observe(document, {
-        childList: true,
-        subtree: true
-    });
-}
+observer.observe(document, {
+    childList: true,
+    subtree: true
+});
+
+chrome.runtime.onMessage.addListener(
+    function (request, sender, sendResponse) {
+        if (request.pageHit === 'calendar') {
+            observer.observe(document, {
+                childList: true,
+                subtree: true
+            });
+            let planButton = document.querySelector('[data-test="calendarAddTrainingPlan"]');
+            if (planButton != null) {
+                observer.disconnect();
+                initCalendarPage();
+            }
+        }
+    }
+);

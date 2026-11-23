@@ -36,7 +36,7 @@ const saveOptions = () => {
 
   if(formValid){
     chrome.storage.local.set(
-      { deleteMode: deleteMode, preferOutdoor: preferOutdoor, intervals_athleteid: intervals_athleteid, intervals_apikey: intervals_apikey },
+      { settingsValid: true, deleteMode: deleteMode, preferOutdoor: preferOutdoor, intervals_athleteid: intervals_athleteid, intervals_apikey: intervals_apikey },
       () => {
         // Update status to let user know options were saved.
         const status = document.getElementById('status');
