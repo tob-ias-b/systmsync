@@ -7,6 +7,10 @@ document.addEventListener("DOMContentLoaded", function () {
   deleteButton.addEventListener("click", function (e) {
     deleteClick(e);
   });
+  var shiftButton = document.getElementById("shift");
+  shiftButton.addEventListener("click", function (e) {
+    shiftClick(e);
+  });
   let dateFrom = document.getElementById("dateFrom");
   dateFrom.value = formatDate(Date.now());
   let dateTo = document.getElementById("dateTo");
@@ -24,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
 const messageTypes = {
   sync: "sync",
   syncDelete: "delete",
+  shift: "shift"
 };
 
 function updateStatus(msg) {
@@ -61,7 +66,7 @@ function getToken() {
   });
 }
 
-function createMessage(mode, token) {
+function createSyncMessage(mode, token) {
   let from = document.getElementById("dateFrom").value;
   let to = document.getElementById("dateTo").value;
   let message = {
@@ -73,6 +78,20 @@ function createMessage(mode, token) {
   return message;
 }
 
+function createShiftMessage(mode, token) {
+  let from = document.getElementById("dateFrom").value;
+  let to = document.getElementById("dateTo").value;
+  let shiftDays = parseInt(document.getElementById("shiftDays").value);
+  let message = {
+    action: mode,
+    token: token,
+    from: from,
+    to: to,
+    shiftDays: shiftDays
+  };
+  return message;
+}
+
 function callSync(messageType) {
   getToken().then((token) => {
     if (token == null) {
@@ -80,7 +99,20 @@ function callSync(messageType) {
         "No SYSTM login token.  Go to the calendar page in SYSTM and login."
       );
     } else {
-      let message = createMessage(messageType, token);
+      let message = createSyncMessage(messageType, token);
+      chrome.runtime.sendMessage(message);
+    }
+  });
+}
+
+function callShift(messageType) {
+  getToken().then((token) => {
+    if (token == null) {
+      alert(
+        "No SYSTM login token.  Go to the calendar page in SYSTM and login."
+      );
+    } else {
+      let message = createShiftMessage(messageType, token);
       chrome.runtime.sendMessage(message);
     }
   });
@@ -97,5 +129,15 @@ function deleteClick(e) {
     )
   ) {
     callSync(messageTypes.syncDelete);
+  }
+}
+
+function shiftClick(e) {
+  if (
+    confirm(
+      "Are you sure you want to move these workouts?"
+    )
+  ) {
+    callShift(messageTypes.shift);
   }
 }

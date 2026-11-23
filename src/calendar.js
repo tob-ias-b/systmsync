@@ -22,6 +22,9 @@ function initCalendarPage() {
 
   let token = getToken();
   chrome.runtime.sendMessage({ action: 'setToken', systmToken: token });
+
+  let userProfile = getUserProfile();
+  chrome.runtime.sendMessage({ action: 'setUserProfile', userProfile: userProfile });
 }
 
 function getToken() {
@@ -31,6 +34,11 @@ function getToken() {
     : bearerTokenItem;
 
   return bearerToken;
+}
+
+function getUserProfile() {
+  const value = window.localStorage.getItem("SYSTM/user");
+  return JSON.parse(value);
 }
 
 function handleIcuClick(e) {

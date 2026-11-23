@@ -1,5 +1,5 @@
 div {
-    padding: 2px;
+    padding: 5px;
 }
 
 div.container {
@@ -19,4 +19,8 @@ div.header span{
     font-size: 14px;
     font-weight: 500;
     width: 316px
+}
+
+input[type=number] {
+    width: 3em;
 }
