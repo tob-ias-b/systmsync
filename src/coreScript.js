@@ -7,11 +7,11 @@ function GetWorkoutGraphTrigger(settings, item) {
     // Couldn't recreate but was one that was manually set as complete.
     // Validate ALL required properties before trying to use them.
     let validProperties = true;
-    if(item === null) validProperties = false;
-    if(item.prospects === null) validProperties = false;
-    if(item.plannedDate === null) validProperties = false;
-    if(item.agendaId === null) validProperties = false;
-    if(validProperties === false) {
+    if (item === null) validProperties = false;
+    if (item.prospects === null) validProperties = false;
+    if (item.plannedDate === null) validProperties = false;
+    if (item.agendaId === null) validProperties = false;
+    if (validProperties === false) {
         console.log('Invalid UserPlanQueryItem:');
         console.log(item);
         return Promise.resolve(null);
@@ -48,7 +48,7 @@ function GetWorkoutGraphTrigger(settings, item) {
     });
 }
 
-function GetWorkouts(settings, item) {
+function GetWorkouts(settings, item, userProfile) {
 
     let promise = null;
 
@@ -56,11 +56,11 @@ function GetWorkouts(settings, item) {
     // Couldn't recreate but was one that was manually set as complete.
     // Validate ALL required properties before trying to use them.
     let validProperties = true;
-    if(item === null) validProperties = false;
-    if(item.prospects === null) validProperties = false;
-    if(item.plannedDate === null) validProperties = false;
-    if(item.agendaId === null) validProperties = false;
-    if(validProperties === false) {
+    if (item === null) validProperties = false;
+    if (item.prospects === null) validProperties = false;
+    if (item.plannedDate === null) validProperties = false;
+    if (item.agendaId === null) validProperties = false;
+    if (validProperties === false) {
         console.log('Invalid UserPlanQueryItem:');
         console.log(item);
         return Promise.resolve(null);
@@ -81,7 +81,7 @@ function GetWorkouts(settings, item) {
     }
 
     return promise.then((data) => {
-        const ergWorkout = formatWorkoutToErg(data, settings.preferOutdoor);
+        const ergWorkout = formatWorkoutToErg(data, settings.preferOutdoor, userProfile);
         let workout = {
             name: item.prospects[0].name,
             type: item.prospects[0].type,
@@ -97,18 +97,17 @@ function GetWorkouts(settings, item) {
     });
 }
 
-
-function GetMappedWorkouts(settings) {
+function GetMappedWorkouts(settings, userProfile) {
     const promises = [];
     const dates = getAgendaStartEndDate();
 
     return RunSYSTMQuery(userPlanQuery(dates.startDate, dates.endDate))
         .then((data) => {
             data.userPlan.forEach((item) => {
-                if(settings.preferOutdoor === true) {
+                if (settings.preferOutdoor === true) {
                     promises.push(GetWorkoutGraphTrigger(settings, item));
                 } else {
-                    promises.push(GetWorkouts(settings, item));
+                    promises.push(GetWorkouts(settings, item, userProfile));
                 }
             });
             return Promise.all(promises);
@@ -124,7 +123,12 @@ function GetMappedWorkouts(settings) {
         });
 }
 
+function GetUserProfile() {
+    return RunSYSTMQuery(userProfileQuery());
+}
+
 function initCalendarPage() {
+
     let icuButton = document.querySelector('[data-test="SyncICU"]');
     if (icuButton != null) {
         return;
@@ -132,6 +136,7 @@ function initCalendarPage() {
 
     const sourceButton = document.querySelector('[data-test="calendarAddTrainingPlan"]');
     if (sourceButton == null) {
+        resetInitTimer();
         return;
     }
 
@@ -159,7 +164,10 @@ function handleIcuClick(e) {
             })
             .then(() => {
                 if (settings != null) {
-                    GetMappedWorkouts(settings)
+                    GetUserProfile()
+                        .then((data) => {
+                            return GetMappedWorkouts(settings, data.userProfile);
+                        })
                         .then((workouts) => {
                             if (settings.deleteMode) {
                                 let icuWorkoutDeletes = createIcuWorkoutDeletes(workouts);
@@ -176,7 +184,7 @@ function handleIcuClick(e) {
                             console.log(err);
                             showButtonError(currentTarget)
                             return Promise.resolve();
-                        });            
+                        });
                 }
                 else {
                     showButtonReady(currentTarget);
@@ -212,54 +220,16 @@ function showButtonReady(b) {
     icuButton.enabled = true;
 }
 
-function findDataTestNode(nodes, elementName, val) {
-    let foundValue = null;
+function createInitTimer() {
+    return setTimeout(() => {
+        initCalendarPage();
+    }, 1000);
+}
 
-    for (const nd of nodes) {
-        if (nd.nodeName == elementName && nd.attributes.getNamedItem('data-test') != null) {
-            if (nd.attributes.getNamedItem('data-test').nodeValue == val) {
-                return nd;
-            }
-        }
-        if (nd.childNodes.length > 0) {
-            foundValue = findDataTestNode(nd.childNodes, elementName, val);
-        }
-    }
-
-    return foundValue;
+function resetInitTimer() {
+    initTimer = createInitTimer();
 }
 
 const workoutsCache = new Map();
 
-const observer = new MutationObserver((mutationList, observer) => {
-    for (const mutation of mutationList) {
-        if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
-            let buttonNode = findDataTestNode(mutation.addedNodes, 'BUTTON', 'calendarAddTrainingPlan');
-            if (buttonNode != null) {
-                observer.disconnect();
-                initCalendarPage(buttonNode);
-            }
-        }
-    }
-});
-
-observer.observe(document, {
-    childList: true,
-    subtree: true
-});
-
-chrome.runtime.onMessage.addListener(
-    function (request, sender, sendResponse) {
-        if (request.pageHit === 'calendar') {
-            observer.observe(document, {
-                childList: true,
-                subtree: true
-            });
-            let planButton = document.querySelector('[data-test="calendarAddTrainingPlan"]');
-            if (planButton != null) {
-                observer.disconnect();
-                initCalendarPage();
-            }
-        }
-    }
-);
+let initTimer = createInitTimer();

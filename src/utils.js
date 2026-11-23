@@ -21,12 +21,12 @@ function formatWorkoutTriggerToErg(workoutGraph, useOutdoor) {
 
     const workoutLines = [];
 
-    if(workoutGraph == null || workoutGraph.workoutGraphTriggers == null || workoutGraph.workoutGraphTriggers.indoor == null){
+    if (workoutGraph == null || workoutGraph.workoutGraphTriggers == null || workoutGraph.workoutGraphTriggers.indoor == null) {
         return workoutLines;
     }
 
     var triggers = workoutGraph.workoutGraphTriggers.indoor;
-    if(useOutdoor && workoutGraph.workoutGraphTriggers.outdoor != null) {
+    if (useOutdoor && workoutGraph.workoutGraphTriggers.outdoor != null) {
         triggers = workoutGraph.workoutGraphTriggers.outdoor;
     }
 
@@ -38,19 +38,40 @@ function formatWorkoutTriggerToErg(workoutGraph, useOutdoor) {
     return workoutLines;
 }
 
-function formatWorkoutToErg(workout, useOutdoor) {
+function calcWattTargetFromTarget(userProfile, item) {
+    if (item.parameters.hasOwnProperty('twentyMin')) {
+        return Math.floor((userProfile.ftp * item.parameters.twentyMin.value));
+    } else if (item.parameters.hasOwnProperty('map')) {
+        return Math.floor((userProfile.map * item.parameters.map.value));
+    } else if (item.parameters.hasOwnProperty('ac')) {
+        return Math.floor((userProfile.ac * item.parameters.ac.value));
+    } else if (item.parameters.hasOwnProperty('nm')) {
+        return Math.floor((userProfile.nm * item.parameters.nm.value));
+    } else {
+        return 0;
+    }
+}
+
+function calcFtpPercentFromTarget(userProfile, item) {
+    let watts = calcWattTargetFromTarget(userProfile, item);
+    if(watts === 0) return 0;
+    let ftp_percent = Math.round((watts / userProfile.ftp) * 100);
+    return ftp_percent;
+}
+
+function formatWorkoutToErg(workout, useOutdoor, userProfile) {
 
     const workoutLines = [];
 
-    if(workout == null){
+    if (workout == null) {
         return workoutLines;
     }
 
-    if(workout.workouts.length === 0){
+    if (workout.workouts.length === 0) {
         return workoutLines;
     }
 
-    if(workout.workouts[0].triggers == null){
+    if (workout.workouts[0].triggers == null) {
         return workoutLines;
     }
 
@@ -62,12 +83,13 @@ function formatWorkoutToErg(workout, useOutdoor) {
             let interval = set.tracks[i];
             for (let o = 0; o < interval.objects.length; o++) {
                 let item = interval.objects[o]
-                if(item.type === 'targets'){
+                if (item.type === 'targets') {
                     let seconds = (item.size / 1000);
-                    let ftp_percent = item.parameters.hasOwnProperty('ftp') ? ' ' + Math.floor((item.parameters.ftp.value * 100)) + '%' : '';
+                    //let power = calcWattTargetFromTarget(userProfile, item) + 'W';
+                    let power = calcFtpPercentFromTarget(userProfile, item) + '%';
                     let hrZone = item.parameters.hasOwnProperty('hrZone') ? ' Z' + item.parameters.hrZone.value + ' HR' : '';
                     let rpm = item.parameters.hasOwnProperty('rpm') ? ' ' + item.parameters.rpm.value + 'rpm' : '';
-                    workoutLines.push('- ' + seconds + 's ' + ftp_percent + hrZone + rpm);
+                    workoutLines.push('- ' + seconds + 's ' + power + hrZone + rpm);
                 }
             }
         }
