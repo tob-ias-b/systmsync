@@ -56,7 +56,23 @@ function calcFtpPercentFromTarget(userProfile, item) {
   return ftp_percent;
 }
 
-function formatWorkoutToErg(workout, useOutdoor, userProfile) {
+function getToken() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.session.get({ systmToken: null }).then((values) => {
+      resolve(values.systmToken);
+    });
+  });
+}
+
+function getUserProfile() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.session.get({ userProfile: null }).then((userProfile) => {
+      resolve(userProfile);
+    });
+  });
+}
+
+function formatWorkoutToErg(workout, userProfile) {
   const workoutLines = [];
 
   if (
@@ -78,8 +94,8 @@ function formatWorkoutToErg(workout, useOutdoor, userProfile) {
         let item = interval.objects[o];
         if (item.type === "targets") {
           let seconds = item.size / 1000;
-          //let power = calcWattTargetFromTarget(userProfile, item) + 'W';
-          let power = calcFtpPercentFromTarget(userProfile, item) + "%";
+          //let power = calcWattTargetFromTarget(userProfile.profiles.riderProfile, item) + 'W';
+          let power = calcFtpPercentFromTarget(userProfile.profiles.riderProfile, item) + "%";
           let hrZone = item.parameters.hasOwnProperty("hrZone")
             ? " Z" + item.parameters.hrZone.value + " HR"
             : "";

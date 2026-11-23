@@ -8,6 +8,7 @@ function initCalendarPage() {
     '[data-test="calendarAddTrainingPlan"]'
   );
 
+
   if (sourceButton == null) {
     resetInitTimer();
     return;
@@ -22,8 +23,12 @@ function initCalendarPage() {
 
   let token = getToken();
   chrome.runtime.sendMessage({ action: 'setToken', systmToken: token });
+
+  let userProfile = getUserProfile();
+  chrome.runtime.sendMessage({ action: 'setUserProfile', userProfile: userProfile });
 }
 
+function getToken() {
 function getToken() {
   const bearerTokenItem = window.localStorage.getItem("SYSTM/user/token");
   const bearerToken = Array.isArray(bearerTokenItem)
@@ -31,6 +36,11 @@ function getToken() {
     : bearerTokenItem;
 
   return bearerToken;
+}
+
+function getUserProfile() {
+  const value = window.localStorage.getItem("SYSTM/user");
+  return JSON.parse(value);
 }
 
 function handleIcuClick(e) {
@@ -47,6 +57,12 @@ function resetInitTimer() {
   initTimer = createInitTimer();
 }
 
+function pageInit() {
+  initTimer = createInitTimer();
+}
+var initTimer = null;
+
+window.addEventListener("pageshow", pageInit, true);
 function pageInit() {
   initTimer = createInitTimer();
 }

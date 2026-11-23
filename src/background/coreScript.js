@@ -33,7 +33,7 @@ function GetWorkout(settings, planItem, token, userProfile, query, formatter) {
   }
 
   return promise.then((data) => {
-    const ergWorkout = formatter(data, settings.preferOutdoor, userProfile);
+    const ergWorkout = formatter(data, userProfile);
     let workout = {
       name: planItem.prospects[0].name,
       type: planItem.prospects[0].type,
@@ -103,11 +103,39 @@ function GetMappedWorkouts(settings, userProfile, dates, token) {
     });
 }
 
-function GetUserProfile(token) {
-  return RunSYSTMQuery(getUserProfileQuery(), token);
+function MoveAgendaItems(settings, userProfile, dates, shiftDays, token) {
+  const promises = [];
+
+  updateStatus(
+    "Moving items between " + dates.startDate + " and " + dates.endDate
+  );
+
+  return RunSYSTMQuery(
+    getUserPlansRangeQuery(dates.startDate, dates.endDate),
+    token
+  ).then((data) => {
+    data.userPlan.forEach((item) => {
+      let newDate = new Date(Date.parse(item.plannedDate));
+      newDate.setDate(newDate.getDate() + shiftDays);
+      updateStatus(
+        "Updating item agendaID:" + item.agendaId
+      );   
+      promises.push(
+        RunSYSTMQuery(
+          getMoveAgendaMutation(
+            item.agendaId,
+            newDate.toISOString(),
+            item.appliedTimeZone
+          ),
+          token
+        )
+      );
+    });
+    return Promise.all(promises);
+  });
 }
 
-function handleIcuClick(dates, token, deleteSync) {
+function syncToIcu(dates, token, deleteSync) {
   let settings = null;
 
   return new Promise((resolve, reject) => {
@@ -122,7 +150,7 @@ function handleIcuClick(dates, token, deleteSync) {
       })
       .then(() => {
         if (settings != null) {
-          GetUserProfile(token)
+          getUserProfile()
             .then((data) => {
               return GetMappedWorkouts(
                 settings,
@@ -139,6 +167,49 @@ function handleIcuClick(dates, token, deleteSync) {
                 let icuWorkouts = createIcuWorkouts(workouts);
                 return updateIcu(icuWorkouts, settings);
               }
+            })
+            .then(() => {
+              resolve();
+            })
+            .catch((err) => {
+              console.log(err);
+              reject(err);
+            });
+        } else {
+          resolve();
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        reject(err);
+      });
+  });
+}
+
+function shiftAgenda(dates, shiftDays, token, deleteSync) {
+  let settings = null;
+
+  return new Promise((resolve, reject) => {
+    getSettings()
+      .then((newSettings) => {
+        if (newSettings.settingsValid != true) {
+          chrome.runtime.openOptionsPage();
+          return Promise.resolve();
+        }
+        settings = newSettings;
+        return Promise.resolve();
+      })
+      .then(() => {
+        if (settings != null) {
+          getUserProfile()
+            .then((data) => {
+              return MoveAgendaItems(
+                settings,
+                data.userProfile,
+                dates,
+                shiftDays,
+                token
+              );
             })
             .then(() => {
               resolve();

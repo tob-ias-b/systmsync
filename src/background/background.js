@@ -10,6 +10,9 @@ chrome.runtime.onMessage.addListener(function (message) {
     case "setToken":
       setToken(message);
       break;
+    case "setUserProfile":
+      setUserProfile(message);
+      break;
     case "openOptionsPage":
       openOptionsPage();
       break;
@@ -22,6 +25,9 @@ chrome.runtime.onMessage.addListener(function (message) {
     case "delete":
       deleteSync(message);
       break;
+    case "shift":
+      shift(message);
+      break;
     default:
       break;
   }
@@ -32,7 +38,12 @@ function openOptionsPage() {
 }
 
 function setToken(message) {
+function setToken(message) {
   chrome.storage.session.set({ systmToken: message.systmToken });
+}
+
+function setUserProfile(message) {
+  chrome.storage.session.set({ userProfile: message.userProfile });
 }
 
 function openPopup() {
@@ -42,7 +53,7 @@ function openPopup() {
 function sync(message) {
   let dates = getAgendaStartEndDateFromValues(message.from, message.to);
   statusUpdatePort = chrome.runtime.connect({ name: "sync_status_updates" });
-  handleIcuClick(dates, message.token, false)
+  syncToIcu(dates, message.token, false)
     .then(() => {
       updateStatus("Sync Complete");
       statusUpdatePort.disconnect();
@@ -56,9 +67,23 @@ function sync(message) {
 function deleteSync(message) {
   let dates = getAgendaStartEndDateFromValues(message.from, message.to);
   statusUpdatePort = chrome.runtime.connect({ name: "sync_status_updates" });
-  handleIcuClick(dates, message.token, true)
+  syncToIcu(dates, message.token, true)
     .then(() => {
       updateStatus("Sync Complete");
+      statusUpdatePort.disconnect();
+    })
+    .catch((err) => {
+      updateStatus("Error:" + err);
+      statusUpdatePort.disconnect();
+    });
+}
+
+function shift(message) {
+  let dates = getAgendaStartEndDateFromValues(message.from, message.to);
+  statusUpdatePort = chrome.runtime.connect({ name: "sync_status_updates" });
+  shiftAgenda(dates, message.shiftDays, message.token, true)
+    .then(() => {
+      updateStatus("Shift Complete");
       statusUpdatePort.disconnect();
     })
     .catch((err) => {
