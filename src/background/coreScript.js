@@ -114,7 +114,7 @@ function handleIcuClick(dates, token, deleteSync) {
     getSettings()
       .then((newSettings) => {
         if (newSettings.settingsValid != true) {
-          chrome.runtime.sendMessage({ action: "openOptionsPage" });
+          chrome.runtime.openOptionsPage();
           return Promise.resolve();
         }
         settings = newSettings;
