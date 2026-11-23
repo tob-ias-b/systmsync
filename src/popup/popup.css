@@ -1,0 +1,22 @@
+div {
+    padding: 2px;
+}
+
+div.container {
+    width: 320px;
+}
+
+div.header{
+    display: flex;
+    align-items: center;
+}
+
+div.header span{
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-family: Roboto, Ubuntu, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    width: 316px
+}

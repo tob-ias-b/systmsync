@@ -13,3 +13,5 @@
 
 /*.zip
 __azurite*
+/staging
+/publish

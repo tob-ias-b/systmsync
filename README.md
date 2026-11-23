@@ -30,10 +30,7 @@ Like what you see?  You can donate via buymeacoffee at [buymeacoffee](https://bu
 * Currently "off plan" workouts completed in the SYSTM app cannot be uploaded from the calendar (data is missing).
 
 # Future
-* Some half decent icons
-* Add a dialog to select custom date ranges.
 * Allow sync of plan items only with a button next to the plan name.
-* Fuigure out a better way to trigger deletes rather than having to change the options.
 * Integrate using OAuth with intervals.icu instead of needing individual API keys.
 * Integrate with other platforms.
 
