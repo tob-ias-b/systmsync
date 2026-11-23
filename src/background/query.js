@@ -189,3 +189,20 @@ const getUserProfileQuery = () => {
   }`,
   };
 };
+
+const getMoveAgendaMutation = (agendaId, newDate, timeZone) => {
+  return {
+    operationName: "MoveAgenda",
+    variables: {
+      agendaId: agendaId,
+      date: newDate,
+      rank: 200,
+      timeZone: timeZone
+    },
+    query: `mutation MoveAgenda($agendaId: ID!, $date: Date!, $rank: Int, $timeZone: TimeZone) {
+      moveAgenda(agendaId: $agendaId, date: $date, rank: $rank, timeZone: $timeZone) {
+        status
+      }
+    }`
+  }
+};
