@@ -7,11 +7,14 @@ importScripts("coreScript.js");
 
 chrome.runtime.onMessage.addListener(function (message) {
   switch (message.action) {
+    case "setToken":
+      setToken(message);
+      break;
     case "openOptionsPage":
       openOptionsPage();
       break;
     case "openPopup":
-      openPopup(message);
+      openPopup();
       break;
     case "sync":
       sync(message);
@@ -28,8 +31,11 @@ function openOptionsPage() {
   chrome.runtime.openOptionsPage();
 }
 
-function openPopup(message) {
+function setToken(message) {
   chrome.storage.session.set({ systmToken: message.systmToken });
+}
+
+function openPopup() {
   chrome.action.openPopup();
 }
 
