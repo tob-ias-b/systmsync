@@ -7,7 +7,7 @@ function isPlanItemValidForUpload(item) {
   return validPlanItem;
 }
 
-function GetWorkout(settings, planItem, token, userProfile, query, formatter) {
+function GetWorkout(settings, planItem, token, userProfile, query, formatter, cacheKeyFactory) {
   let promise = null;
 
   if (!isPlanItemValidForUpload(planItem)) {
@@ -19,7 +19,7 @@ function GetWorkout(settings, planItem, token, userProfile, query, formatter) {
   updateStatus("Getting workout " + planItem.prospects[0].name);
 
   const wkid = planItem.prospects[0].workoutId;
-  const cacheKey = settings.preferOutdoor + ":" + wkid;
+  const cacheKey = cacheKeyFactory(wkid);
 
   if (wkid != null && wkid.length > 0) {
     if (workoutsCache.has(cacheKey)) {
@@ -33,7 +33,7 @@ function GetWorkout(settings, planItem, token, userProfile, query, formatter) {
   }
 
   return promise.then((data) => {
-    const ergWorkout = formatter(data, userProfile);
+    const ergWorkout = formatter(data, userProfile.profiles.riderProfile, settings);
     let workout = {
       name: planItem.prospects[0].name,
       type: planItem.prospects[0].type,
@@ -56,7 +56,8 @@ function GetWorkoutGraphTriggers(settings, planItem, userProfile, token) {
     token,
     userProfile,
     workoutGraphTriggersQuery,
-    formatWorkoutTriggerToErg
+    formatWorkoutTriggerToErg,
+    (id) => 'O:' + id
   );
 }
 
@@ -67,15 +68,18 @@ function GetWorkouts(settings, planItem, userProfile, token) {
     token,
     userProfile,
     getWorkoutsQuery,
-    formatWorkoutToErg
+    formatWorkoutToErg,
+    (id) => 'I:' + id
   );
 }
 
-function GetMappedWorkouts(settings, userProfile, dates, token) {
+function GetMappedWorkouts(settings, userProfile, fromDate, toDate, useOutdoor, token) {
   const promises = [];
 
+  let dates = getAgendaStartEndDateFromValues(fromDate, toDate);
+
   updateStatus(
-    "Getting items between " + dates.startDate + " and " + dates.endDate
+    "Getting items between " + fromDate + " and " + toDate
   );
 
   return RunSYSTMQuery(
@@ -84,7 +88,7 @@ function GetMappedWorkouts(settings, userProfile, dates, token) {
   )
     .then((data) => {
       data.userPlan.forEach((item) => {
-        if (settings.preferOutdoor === true) {
+        if (useOutdoor === true) {
           promises.push(GetWorkoutGraphTriggers(settings, item, userProfile, token));
         } else {
           promises.push(GetWorkouts(settings, item, userProfile, token));
@@ -103,8 +107,10 @@ function GetMappedWorkouts(settings, userProfile, dates, token) {
     });
 }
 
-function MoveAgendaItems(settings, userProfile, dates, shiftDays, token) {
+function MoveAgendaItems(fromDate, toDate, shiftDays, token) {
   const promises = [];
+
+  let dates = getAgendaStartEndDateFromValues(fromDate, toDate);
 
   updateStatus(
     "Moving items between " + dates.startDate + " and " + dates.endDate
@@ -136,8 +142,10 @@ function MoveAgendaItems(settings, userProfile, dates, shiftDays, token) {
   });
 }
 
-function syncToIcu(dates, token, deleteSync) {
+function syncToIcu(message) {
   let settings = null;
+  let workouts = null;
+  let deleteSync = (message.action === "delete");
 
   return new Promise((resolve, reject) => {
     getSettings()
@@ -156,11 +164,14 @@ function syncToIcu(dates, token, deleteSync) {
               return GetMappedWorkouts(
                 settings,
                 data.userProfile,
-                dates,
-                token
+                message.fromDate,
+                message.toDate,
+                message.useOutdoor,
+                message.token
               );
             })
-            .then((workouts) => {
+            .then((workoutsRetrieved) => {
+              workouts = workoutsRetrieved;
               if (deleteSync) {
                 let icuWorkoutDeletes = createIcuWorkoutDeletes(workouts);
                 return clearIcu(icuWorkoutDeletes, settings);
@@ -168,6 +179,13 @@ function syncToIcu(dates, token, deleteSync) {
                 let icuWorkouts = createIcuWorkouts(workouts);
                 return updateIcu(icuWorkouts, settings);
               }
+            })
+            .then(() => {
+              return getEventsIcu(settings, message.fromDate, message.toDate);
+            })
+            .then((icuEvents) => {
+              let icuWorkoutDeletes = createIcuWorkoutDeletesFromMissing(workouts, icuEvents);
+              return clearIcu(icuWorkoutDeletes, settings);
             })
             .then(() => {
               resolve();
@@ -187,7 +205,7 @@ function syncToIcu(dates, token, deleteSync) {
   });
 }
 
-function shiftAgenda(dates, shiftDays, token, deleteSync) {
+function shiftAgenda(message) {
   let settings = null;
 
   return new Promise((resolve, reject) => {
@@ -205,11 +223,10 @@ function shiftAgenda(dates, shiftDays, token, deleteSync) {
           getUserProfile()
             .then((data) => {
               return MoveAgendaItems(
-                settings,
-                data.userProfile,
-                dates,
-                shiftDays,
-                token
+                message.fromDate,
+                message.toDate,
+                message.shiftDays,
+                message.token
               );
             })
             .then(() => {

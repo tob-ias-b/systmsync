@@ -90,28 +90,14 @@ function getToken() {
   });
 }
 
-function createSyncMessage(mode, token) {
-  let from = document.getElementById("dateFrom").value;
-  let to = document.getElementById("dateTo").value;
+function createMessage(mode, token) {
   let message = {
     action: mode,
     token: token,
-    from: from,
-    to: to,
-  };
-  return message;
-}
-
-function createShiftMessage(mode, token) {
-  let from = document.getElementById("dateFrom").value;
-  let to = document.getElementById("dateTo").value;
-  let shiftDays = parseInt(document.getElementById("shiftDays").value);
-  let message = {
-    action: mode,
-    token: token,
-    from: from,
-    to: to,
-    shiftDays: shiftDays,
+    fromDate: document.getElementById("dateFrom").value,
+    toDate: document.getElementById("dateTo").value,
+    useOutdoor: document.getElementById("useOutdoor").value.toLowerCase() === "true" ? true : false,
+    shiftDays: parseInt(document.getElementById("shiftDays").value)
   };
   return message;
 }
@@ -121,7 +107,7 @@ function callSync(messageType) {
     if (token == null) {
       showNoToken();
     } else {
-      let message = createSyncMessage(messageType, token);
+      let message = createMessage(messageType, token);
       chrome.runtime.sendMessage(message);
     }
   });
@@ -132,7 +118,7 @@ function callShift(messageType) {
     if (token == null) {
       showNoToken();
     } else {
-      let message = createShiftMessage(messageType, token);
+      let message = createMessage(messageType, token);
       chrome.runtime.sendMessage(message);
     }
   });

@@ -13,10 +13,8 @@ chrome.runtime.onMessage.addListener(function (message) {
       openPopup();
       break;
     case "sync":
-      sync(message);
-      break;
     case "delete":
-      deleteSync(message);
+      sync(message);
       break;
     case "shift":
       shift(message);
@@ -44,23 +42,8 @@ function openPopup() {
 }
 
 function sync(message) {
-  let dates = getAgendaStartEndDateFromValues(message.from, message.to);
   statusUpdatePort = chrome.runtime.connect({ name: "sync_status_updates" });
-  syncToIcu(dates, message.token, false)
-    .then(() => {
-      updateStatus("Sync Complete");
-      statusUpdatePort.disconnect();
-    })
-    .catch((err) => {
-      updateStatus("Error:" + err);
-      statusUpdatePort.disconnect();
-    });
-}
-
-function deleteSync(message) {
-  let dates = getAgendaStartEndDateFromValues(message.from, message.to);
-  statusUpdatePort = chrome.runtime.connect({ name: "sync_status_updates" });
-  syncToIcu(dates, message.token, true)
+  syncToIcu(message)
     .then(() => {
       updateStatus("Sync Complete");
       statusUpdatePort.disconnect();
@@ -72,9 +55,8 @@ function deleteSync(message) {
 }
 
 function shift(message) {
-  let dates = getAgendaStartEndDateFromValues(message.from, message.to);
   statusUpdatePort = chrome.runtime.connect({ name: "sync_status_updates" });
-  shiftAgenda(dates, message.shiftDays, message.token, true)
+  shiftAgenda(message)
     .then(() => {
       updateStatus("Shift Complete");
       statusUpdatePort.disconnect();

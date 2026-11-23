@@ -1,18 +1,19 @@
 // Saves options to chrome.storage
 const saveOptions = () => {
-  const preferOutdoor = document.getElementById("preferOutdoor").value;
+  const applyOutdoorPowerRange = document.getElementById("applyOutdoorPowerRange").value;
+
   const intervals_athleteid = document.getElementById(
     "intervals_athleteid"
   ).value;
   const intervals_apikey = document.getElementById("intervals_apikey").value;
   let formValid = true;
 
-  if (preferOutdoor != "false" && preferOutdoor != "true") {
-    document.getElementById("preferoutdoor_error").innerText =
-      "Invalid prefer outdoor choice";
+  if (applyOutdoorPowerRange != "false" && applyOutdoorPowerRange != "true") {
+    document.getElementById("applyoutdoorpowerrange_error").innerText =
+      "Invalid outdoor power range choice";
     formValid = false;
   } else {
-    document.getElementById("preferoutdoor_error").innerText = "";
+    document.getElementById("applyoutdoorpowerrange_error").innerText = "";
   }
 
   if (intervals_athleteid.length < 1) {
@@ -33,7 +34,7 @@ const saveOptions = () => {
     chrome.storage.local.set(
       {
         settingsValid: true,
-        preferOutdoor: preferOutdoor,
+        applyOutdoorPowerRange: applyOutdoorPowerRange,
         intervals_athleteid: intervals_athleteid,
         intervals_apikey: intervals_apikey,
       },
@@ -53,9 +54,9 @@ const saveOptions = () => {
 // stored in chrome.storage.
 const restoreOptions = () => {
   chrome.storage.local.get(
-    { preferOutdoor: false, intervals_athleteid: "", intervals_apikey: "" },
+    { applyOutdoorPowerRange: true, intervals_athleteid: "", intervals_apikey: "" },
     (items) => {
-      document.getElementById("preferOutdoor").value = items.preferOutdoor;
+      document.getElementById("applyOutdoorPowerRange").value = items.applyOutdoorPowerRange;
       document.getElementById("intervals_athleteid").value =
         items.intervals_athleteid;
       document.getElementById("intervals_apikey").value =

@@ -3,7 +3,7 @@ function getSettings() {
     chrome.storage.local
       .get({
         settingsValid: false,
-        preferOutdoor: "false",
+        applyOutdoorPowerRange: "true",
         intervals_athleteid: "",
         intervals_apikey: "",
       })
@@ -12,7 +12,7 @@ function getSettings() {
           settingsValid: items.settingsValid,
           bearerToken: btoa("API_KEY:" + items.intervals_apikey),
           athleteId: items.intervals_athleteid,
-          preferOutdoor: items.preferOutdoor.toLowerCase() === "true",
+          applyOutdoorPowerRange: items.applyOutdoorPowerRange.toLowerCase() === "true"
         })
       )
   );

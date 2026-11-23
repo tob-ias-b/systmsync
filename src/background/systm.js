@@ -33,3 +33,19 @@ function RunSYSTMQuery(query, token) {
     });
   });
 }
+
+function getToken() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.session.get({ systmToken: null }).then((values) => {
+      resolve(values.systmToken);
+    });
+  });
+}
+
+function getUserProfile() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.session.get({ userProfile: null }).then((userProfile) => {
+      resolve(userProfile);
+    });
+  });
+}

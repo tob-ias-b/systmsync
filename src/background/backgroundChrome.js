@@ -1,1 +1,11 @@
-importScripts("./settings.js", "./query.js", "./utils.js", "./intervalsicu.js", "./systm.js", "./coreScript.js", "./background.js");
+importScripts(
+  "./settings.js",
+  "./query.js",
+  "./utils.js",
+  "./workoutToErg.js",
+  "./workoutTriggerToErg.js",
+  "./intervalsicu.js",
+  "./systm.js",
+  "./coreScript.js",
+  "./background.js"
+);
