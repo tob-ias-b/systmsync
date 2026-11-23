@@ -15,12 +15,21 @@ document.addEventListener("DOMContentLoaded", function () {
     console.assert(port.name === "sync_status_updates");
     if (port.name === "sync_status_updates") {
       port.onMessage.addListener(function (msg) {
-        let statusElement = document.getElementById("status");
-        statusElement.innerText = msg.status_text;
+        updateStatus(msg);
       });
     }
   });
 });
+
+const messageTypes = {
+  sync: "sync",
+  syncDelete: "delete",
+};
+
+function updateStatus(msg) {
+  let statusElement = document.getElementById("status");
+  statusElement.innerText = msg.status_text;
+}
 
 function formatDate(dateNowVal) {
   let dateNow = new Date(dateNowVal);
@@ -44,19 +53,41 @@ function prefix(char, len, val) {
   return (char.repeat(len) + val).slice(-len);
 }
 
-function syncClick(e) {
+function getToken() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.session.get({ systmToken: null }).then((values) => {
+      resolve(values.systmToken);
+    });
+  });
+}
+
+function createMessage(mode, token) {
   let from = document.getElementById("dateFrom").value;
   let to = document.getElementById("dateTo").value;
-  chrome.storage.session.get({ systmToken: null }, (values) => {
-    if (values.systmToken != null) {
-      chrome.runtime.sendMessage({
-        action: "sync",
-        token: values.systmToken,
-        from: from,
-        to: to,
-      });
+  let message = {
+    action: mode,
+    token: token,
+    from: from,
+    to: to,
+  };
+  return message;
+}
+
+function callSync(messageType) {
+  getToken().then((token) => {
+    if (token == null) {
+      alert(
+        "No SYSTM login token.  Go to the calendar page in SYSTM and login."
+      );
+    } else {
+      let message = createMessage(messageType, token);
+      chrome.runtime.sendMessage(message);
     }
   });
+}
+
+function syncClick(e) {
+  callSync(messageTypes.sync);
 }
 
 function deleteClick(e) {
@@ -65,17 +96,6 @@ function deleteClick(e) {
       "Are you sure you want to delete SYSTM workouts from Intervals.icu?"
     )
   ) {
-    let from = document.getElementById("dateFrom").value;
-    let to = document.getElementById("dateTo").value;
-    chrome.storage.session.get({ systmToken: null }, (values) => {
-      if (values.systmToken != null) {
-        chrome.runtime.sendMessage({
-          action: "delete",
-          token: values.systmToken,
-          from: from,
-          to: to,
-        });
-      }
-    });
+    callSync(messageTypes.syncDelete);
   }
 }
