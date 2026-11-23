@@ -1,5 +1,5 @@
 #!/bin/bash
-PRJ=~/src/SystmSync
+PRJ=~/Repositories/SystmSync
 SRC=$PRJ/src
 STAGE=$PRJ/staging
 PUB=$PRJ/publish
