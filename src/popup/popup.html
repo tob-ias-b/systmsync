@@ -1,0 +1,38 @@
+<html>
+
+<head>
+  <title>Calendar Sync</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+
+<body>
+  <div class="container header">
+    <img src="../media/icon_32.png"><span>SYSTM 2 Intervals</span>
+  </div>
+  <div class="container">
+    <div>
+      <span>
+        Find this useful? You can show your gratitude, and encourage further
+        development if you
+        <a href="https://buymeacoffee.com/iliketurtles" target="_blank">buy me a coffee</a>.
+      </span>
+    </div>
+    <div>
+      <label for="dateFrom">From</label>
+      <input type="date" id="dateFrom" />
+      <label for="dateTo">To</label>
+      <input type="date" id="dateTo" />
+    </div>
+    <div>
+      <button id="sync" type="submit">Sync</button>
+      <button id="delete" type="submit">Delete</button>
+    </div>
+    <div style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+      <span>Status:</span>
+      <span id="status"></span>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+
+</html>

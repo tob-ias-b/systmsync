@@ -1,0 +1,21 @@
+input {
+  width: 100%;
+  padding: 0;
+}
+.column-1 {
+  width: 100%;
+}
+.column-2 {
+  width: 50%;
+}
+.column-3 {
+  width: 33.333%;
+}
+.error-column {
+  text-align: right;
+}
+.row {
+  width: 100%;
+  display: inline-flex;
+  flex-wrap: wrap;
+}

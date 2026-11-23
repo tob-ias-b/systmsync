@@ -1,8 +1,8 @@
 const workoutGraphTriggersQuery = (workoutId) => {
   return {
-    operationName: 'workoutGraphTriggers',
+    operationName: "workoutGraphTriggers",
     variables: {
-      workoutId: workoutId
+      workoutId: workoutId,
     },
     query: `query workoutGraphTriggers($workoutId: ID!) {
         workoutGraphTriggers(workoutId: $workoutId) {
@@ -18,15 +18,15 @@ const workoutGraphTriggersQuery = (workoutId) => {
           }
         }
         }
-        `
-  }
-}
+        `,
+  };
+};
 
 const getWorkoutsQuery = (workoutId) => {
   return {
-    operationName: 'GetWorkouts',
+    operationName: "GetWorkouts",
     variables: {
-      id: workoutId
+      id: workoutId,
     },
     query: `query GetWorkouts($id: ID) {
       workouts(id: $id) {
@@ -81,83 +81,20 @@ const getWorkoutsQuery = (workoutId) => {
         }
         __typename
       }
-    }`
-  }
-}
+    }`,
+  };
+};
 
-const getWorkoutsQuery = (workoutId) => {
+const getUserPlansRangeQuery = (startDate, endDate) => {
   return {
-    operationName: 'GetWorkouts',
-    variables: {
-        id: workoutId
-    },
-    query: `query GetWorkouts($id: ID) {
-      workouts(id: $id) {
-        id
-        sortOrder
-        sport
-        stampImage
-        bannerImage
-        bestFor
-        equipment {
-          name
-          description
-          thumbnail
-          __typename
-        }
-        details
-        shortDescription
-        level
-        durationSeconds
-        name
-        triggers
-        featuredRaces {
-          name
-          thumbnail
-          darkBackgroundThumbnail
-          __typename
-        }
-        metrics {
-          intensityFactor
-          tss
-          ratings {
-            nm
-            ac
-            map
-            ftp
-            __typename
-          }
-          __typename
-        }
-        brand
-        nonAppWorkout
-        notes
-        tags
-        imperatives {
-          userSettings {
-            birthday
-            gender
-            weight
-            __typename
-          }
-          __typename
-        }
-        __typename
-      }
-    }`
-  }
-}
-
-const userPlanQuery = (startDate, endDate) => {
-  return {
-    operationName: 'GetUserPlansRange',
+    operationName: "GetUserPlansRange",
     variables: {
       startDate: startDate,
       endDate: endDate,
       queryParams: {
-        limit: 500
+        limit: 500,
       },
-      timezone: 'Europe/London'
+      timezone: "Europe/London",
     },
     query: `query GetUserPlansRange(
         $startDate: Date
@@ -202,13 +139,13 @@ const userPlanQuery = (startDate, endDate) => {
           contentId
           workoutId
         }
-      }`
-  }
-}
+      }`,
+  };
+};
 
-const userProfileQuery = () => {
+const getUserProfileQuery = () => {
   return {
-    operationName: 'GetUserProfile',
+    operationName: "GetUserProfile",
     query: `query GetUserProfile {
     userProfile {
       ...userProfileFragment
@@ -249,6 +186,6 @@ const userProfileQuery = () => {
         activity
       }
     }
-  }`
-  }
-}
+  }`,
+  };
+};
