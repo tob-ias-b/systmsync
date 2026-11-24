@@ -1,51 +1,44 @@
-const systmToIcuWorkoutTypesMap = new Map();
-systmToIcuWorkoutTypesMap.set(
-  "MountainBiking",
-  icuWorkoutTypes.MountainBikeRide
-);
-systmToIcuWorkoutTypesMap.set("Running", icuWorkoutTypes.Run);
-systmToIcuWorkoutTypesMap.set("Cycling", icuWorkoutTypes.Ride);
-systmToIcuWorkoutTypesMap.set("Cyclocross", icuWorkoutTypes.Ride);
-systmToIcuWorkoutTypesMap.set("Strength", icuWorkoutTypes.WeightTraining);
-systmToIcuWorkoutTypesMap.set("Yoga", icuWorkoutTypes.Yoga);
-systmToIcuWorkoutTypesMap.set("Swimming", icuWorkoutTypes.Swim);
+const systmToIcuWorkoutTypesMap = new Map([
+  ["MountainBiking", icuWorkoutTypes.MountainBikeRide],
+  ["Running", icuWorkoutTypes.Run],
+  ["Cycling", icuWorkoutTypes.Ride],
+  ["Cyclocross", icuWorkoutTypes.Ride],
+  ["Strength", icuWorkoutTypes.WeightTraining],
+  ["Yoga", icuWorkoutTypes.Yoga],
+  ["Swimming", icuWorkoutTypes.Swim],
+]);
+
+async function runSystmQuery(query, token) {
+  const response = await fetch("https://api.thesufferfest.com/graphql", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
+    body: JSON.stringify(query),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      "Invalid response status from SYSTM API: " + response.status
+    );
+  }
+
+  const body = await response.json();
+  if (body.errors && body.errors.length > 0) {
+    throw new Error(body.errors.map((error) => error.message).join("; "));
+  }
+  return body.data;
+}
 
 function RunSYSTMQuery(query, token) {
-  return new Promise(function (resolve, reject) {
-    let payload = JSON.stringify(query);
-    let req = new Request("https://api.thesufferfest.com/graphql", {
-      method: "POST",
-      body: payload,
-    });
-    req.headers.set("Content-Type", "application/json");
-    req.headers.set("Authorization", "Bearer " + token);
-
-    fetch(req).then((response) => {
-      if (response.ok) {
-        response.json().then((body) => {
-          resolve(body.data);
-        });
-      } else {
-        reject(
-          "Invalid response status from sufferfest api:" + response.status
-        );
-      }
-    });
-  });
+  return runSystmQuery(query, token);
 }
 
 function getToken() {
-  return new Promise((resolve, reject) => {
-    chrome.storage.session.get({ systmToken: null }).then((values) => {
-      resolve(values.systmToken);
-    });
-  });
+  return chrome.storage.session.get({ systmToken: null }).then((values) => values.systmToken);
 }
 
 function getUserProfile() {
-  return new Promise((resolve, reject) => {
-    chrome.storage.session.get({ userProfile: null }).then((userProfile) => {
-      resolve(userProfile);
-    });
-  });
+  return chrome.storage.session.get({ userProfile: null });
 }

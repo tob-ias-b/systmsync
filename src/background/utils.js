@@ -1,36 +1,24 @@
 function getAgendaStartEndDateFromValues(startDate, endDate) {
-  let dateValue = new Date(startDate);
-  const startDateParam = dateValue.toISOString();
-  dateValue = new Date(endDate);
-  dateValue.setDate(dateValue.getDate() + 1);
-  dateValue.setMilliseconds(dateValue.getMilliseconds() - 1);
-  const endDateParam = dateValue.toISOString();
-  var p = {};
-  p.startDate = startDateParam;
-  p.endDate = endDateParam;
-  return p;
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  end.setDate(end.getDate() + 1);
+  end.setMilliseconds(end.getMilliseconds() - 1);
+
+  return {
+    startDate: start.toISOString(),
+    endDate: end.toISOString(),
+  };
 }
 
 function ftpValueToOutdoor(ftpValue) {
-  let ftp_percent = 0;
-
-  if (ftpValue <= 0.5) {
-    ftp_percent = "30-50";
-  } else if (ftpValue <= 0.75) {
-    ftp_percent = "51-75";
-  } else if (ftpValue <= 0.91) {
-    ftp_percent = "76-91";
-  } else if (ftpValue <= 1.01) {
-    ftp_percent = "92-101";
-  } else {
-    ftp_percent = "102-108";
-  }
-
-  return ftp_percent;
+  if (ftpValue <= 0.5) return "30-50";
+  if (ftpValue <= 0.75) return "51-75";
+  if (ftpValue <= 0.91) return "76-91";
+  if (ftpValue <= 1.01) return "92-101";
+  return "102-108";
 }
 
 function calcFtpPercentFromWatts(ftp, watts) {
-  if (watts === 0) return 0;
-  let ftp_percent = Math.round((watts / ftp) * 100);
-  return ftp_percent;
+  if (!ftp || watts === 0) return 0;
+  return Math.round((watts / ftp) * 100);
 }

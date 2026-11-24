@@ -70,49 +70,46 @@ const icuApiUris = {
   listEvents: {
     verb: "GET",
     uri: "https://intervals.icu/api/v1/athlete/{athleteId}/eventsjson?resolve=false",
-  }
+  },
 };
 
 function formatDateForApi(value) {
-  let theDate = new Date(value);
-  return theDate.getUTCFullYear() + '-' + (theDate.getUTCMonth() + 1).toString().padStart(2, '0') + '-' + theDate.getUTCDate().toString().padStart(2, '0') + 'T00:00:00';
+  const date = new Date(value);
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}T00:00:00`;
 }
 
-function callIcuApi(icuApiUri, athleteId, token, message, queryString) {
-  const formattedUri = icuApiUri.uri.replace("{athleteId}", athleteId) + queryString;
-  let req = null;
+async function callIcuApi(api, athleteId, token, payload, queryString = "") {
+  const url = api.uri.replace("{athleteId}", encodeURIComponent(athleteId)) + queryString;
+  const options = {
+    method: api.verb,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Basic " + token,
+    },
+  };
 
-  return new Promise(function (resolve, reject) {
-    if(icuApiUri.verb === "PUT" || icuApiUri.verb === "POST"){
-      let payload = JSON.stringify(message);
-      req = new Request(formattedUri, {
-        method: icuApiUri.verb,
-        body: payload,
-      });
-    } else {
-      req = new Request(formattedUri, {
-        method: icuApiUri.verb
-      });
-    }
-    req.headers.set("Content-Type", "application/json");
-    req.headers.set("Authorization", "Basic " + token);
+  if (payload !== null && payload !== undefined) {
+    options.body = JSON.stringify(payload);
+  }
 
-    fetch(req).then((response) => {
-      if (response.ok) {
-        response.json().then((body) => {
-          resolve(body);
-        });
-      } else {
-        reject(
-          "Invalid response status from intervals.icu api:" + response.status
-        );
-      }
-    });
-  });
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    throw new Error(
+      "Invalid response status from intervals.icu API: " + response.status
+    );
+  }
+
+  if (response.status === 204) return {};
+  const responseText = await response.text();
+  return responseText ? JSON.parse(responseText) : {};
 }
 
 function getEventsIcu(settings, fromDate, toDate) {
-  let queryString = '&oldest=' + formatDateForApi(fromDate) + '&newest=' + formatDateForApi(toDate);
+  const queryString =
+    "&oldest=" +
+    encodeURIComponent(formatDateForApi(fromDate)) +
+    "&newest=" +
+    encodeURIComponent(formatDateForApi(toDate));
   updateStatus("Calling intervals.icu to get events");
   return callIcuApi(
     icuApiUris.listEvents,
@@ -124,67 +121,50 @@ function getEventsIcu(settings, fromDate, toDate) {
 }
 
 function clearIcu(workouts, settings) {
-  if (workouts === null || workouts.length === 0) {
-    // Nothing to do
-    return Promise.resolve({});
-  }
+  if (!workouts || workouts.length === 0) return Promise.resolve({});
   updateStatus("Calling intervals.icu to delete workouts");
   return callIcuApi(
     icuApiUris.bulkDelete,
     settings.athleteId,
     settings.bearerToken,
-    workouts,
-    ''
+    workouts
   );
 }
 
 function updateIcu(workouts, settings) {
-  if (workouts === null || workouts.length === 0) {
-    // Nothing to do
-    return Promise.resolve({});
-  }
+  if (!workouts || workouts.length === 0) return Promise.resolve({});
   updateStatus("Calling intervals.icu to sync workouts");
   return callIcuApi(
     icuApiUris.bulkUpsert,
     settings.athleteId,
     settings.bearerToken,
-    workouts,
-    ''
+    workouts
   );
 }
 
 function mapIcuWorkoutType(workoutType) {
-  if (systmToIcuWorkoutTypesMap.has(workoutType)) {
-    return systmToIcuWorkoutTypesMap.get(workoutType);
-  } else {
-    return null;
-  }
+  return systmToIcuWorkoutTypesMap.get(workoutType) || null;
 }
 
 function mapIcuWorkoutDescription(workout) {
-  if (workout.ergWorkout.length == 0) {
-    return workout.description;
-  } else {
-    return workout.description + "\n\n" + workout.ergWorkout.join("\n");
-  }
+  const ergLines = Array.isArray(workout.ergWorkout) ? workout.ergWorkout : [];
+  return ergLines.length === 0
+    ? workout.description
+    : [workout.description, ergLines.join("\n")].filter(Boolean).join("\n\n");
 }
 
 function createIcuWorkouts(workouts) {
   updateStatus("Creating workouts for intervals.icu");
-  const icuWorkouts = [];
-  workouts.forEach((item) => {
-    icuWorkouts.push(createIcuWorkout(item));
-  });
-  return icuWorkouts;
+  return workouts.map(createIcuWorkout);
 }
 
 function createIcuWorkout(workout) {
   const icuType = mapIcuWorkoutType(workout.type);
   return {
     name: "Wahoo SYSTM: " + workout.name,
-    category: icuType == null ? "NOTE" : "WORKOUT",
+    category: icuType === null ? "NOTE" : "WORKOUT",
     type: icuType ?? workout.type,
-    start_date_local: formatDateForApi(new Date(workout.plannedDate)),
+    start_date_local: formatDateForApi(workout.plannedDate),
     external_id: workout.agendaId,
     description: mapIcuWorkoutDescription(workout),
   };
@@ -192,39 +172,21 @@ function createIcuWorkout(workout) {
 
 function createIcuWorkoutDeletes(workouts) {
   updateStatus("Creating workout deletions for intervals.icu");
-  const icuWorkouts = [];
-  workouts.forEach((item) => {
-    icuWorkouts.push(createIcuWorkoutDelete(item));
-  });
-  return icuWorkouts;
+  return workouts.map(createIcuWorkoutDelete);
 }
 
 function createIcuWorkoutDeletesFromMissing(workouts, icuEvents) {
   updateStatus("Creating workout deletions for intervals.icu");
-  const icuWorkouts = [];
-  icuEvents.forEach((item) => {
-    if(item.external_id !== null){
-      console.log('Looking for ' + item.external_id)
-      let isExist = workouts.find((workout) => workout.agendaId === item.external_id)
-      if(typeof isExist === 'undefined'){
-        console.log('Did not find ' + item.external_id + ' so deleting.');
-        icuWorkouts.push(createIcuEventDelete(item));
-      } else {
-        console.log('Found item ' + isExist.agendaId + ' ' + isExist.name);
-      }  
-    }
-  });
-  return icuWorkouts;
+  const agendaIds = new Set(workouts.map((workout) => workout.agendaId));
+  return (icuEvents || [])
+    .filter((event) => event.external_id != null && !agendaIds.has(event.external_id))
+    .map(createIcuEventDelete);
 }
 
 function createIcuEventDelete(event) {
-  return {
-    external_id: event.external_id,
-  };
+  return { external_id: event.external_id };
 }
 
 function createIcuWorkoutDelete(workout) {
-  return {
-    external_id: workout.agendaId,
-  };
+  return { external_id: workout.agendaId };
 }

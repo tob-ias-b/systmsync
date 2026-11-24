@@ -1,58 +1,49 @@
 function calcWattTargetFromTarget(riderProfile, item) {
-  if (item.parameters.hasOwnProperty("twentyMin")) {
-    return Math.floor(riderProfile.ftp * item.parameters.twentyMin.value);
-  } else if (item.parameters.hasOwnProperty("map")) {
-    return Math.floor(riderProfile.map * item.parameters.map.value);
-  } else if (item.parameters.hasOwnProperty("ac")) {
-    return Math.floor(riderProfile.ac * item.parameters.ac.value);
-  } else if (item.parameters.hasOwnProperty("nm")) {
-    return Math.floor(riderProfile.nm * item.parameters.nm.value);
-  } else {
-    return 0;
-  }
+  const parameters = item && item.parameters ? item.parameters : {};
+  const targets = [
+    ["twentyMin", "ftp"],
+    ["map", "map"],
+    ["ac", "ac"],
+    ["nm", "nm"],
+  ];
+  const target = targets.find(([parameter]) =>
+    Object.prototype.hasOwnProperty.call(parameters, parameter)
+  );
+
+  return target
+    ? Math.floor(riderProfile[target[1]] * parameters[target[0]].value)
+    : 0;
 }
 
 function calcFtpPercentFromTarget(riderProfile, item) {
-  let watts = calcWattTargetFromTarget(riderProfile, item);
-  let ftp_percent = calcFtpPercentFromWatts(riderProfile.ftp, watts);
-  return ftp_percent;
+  return calcFtpPercentFromWatts(
+    riderProfile.ftp,
+    calcWattTargetFromTarget(riderProfile, item)
+  );
 }
 
-function formatWorkoutToErg(workout, riderProfile, settings) {
+function formatWorkoutToErg(workout, riderProfile) {
   const workoutLines = [];
+  const workoutData = workout && workout.workouts && workout.workouts[0];
+  if (!workoutData || !workoutData.triggers) return workoutLines;
 
-  if (
-    workout == null ||
-    workout.workouts == null ||
-    workout.workouts.length === 0 ||
-    workout.workouts[0].triggers == null
-  ) {
-    return workoutLines;
-  }
+  const workoutTriggers = JSON.parse(workoutData.triggers);
+  workoutTriggers.forEach((set) => {
+    (set.tracks || []).forEach((interval) => {
+      (interval.objects || []).forEach((item) => {
+        if (item.type !== "targets") return;
 
-  workoutTriggers = JSON.parse(workout.workouts[0].triggers);
-
-  for (let s = 0; s < workoutTriggers.length; s++) {
-    let set = workoutTriggers[s];
-    for (let i = 0; i < set.tracks.length; i++) {
-      let interval = set.tracks[i];
-      for (let o = 0; o < interval.objects.length; o++) {
-        let item = interval.objects[o];
-        if (item.type === "targets") {
-          let seconds = Math.floor(item.size / 1000);
-          //let power = calcWattTargetFromTarget(riderProfile, item) + 'W';
-          let power = calcFtpPercentFromTarget(riderProfile, item) + "%";
-          let hrZone = item.parameters.hasOwnProperty("hrZone")
-            ? " Z" + item.parameters.hrZone.value + " HR"
-            : "";
-          let rpm = item.parameters.hasOwnProperty("rpm")
-            ? " " + item.parameters.rpm.value + "rpm"
-            : "";
-          workoutLines.push("- " + seconds + "s " + power + hrZone + rpm);
-        }
-      }
-    }
-  }
+        const seconds = Math.floor(item.size / 1000);
+        const power = calcFtpPercentFromTarget(riderProfile, item);
+        const parameters = item.parameters || {};
+        const hrZone = parameters.hrZone
+          ? " Z" + parameters.hrZone.value + " HR"
+          : "";
+        const rpm = parameters.rpm ? " " + parameters.rpm.value + "rpm" : "";
+        workoutLines.push(`- ${seconds}s ${power}%${hrZone}${rpm}`);
+      });
+    });
+  });
 
   return workoutLines;
 }
